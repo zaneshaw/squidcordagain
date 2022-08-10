@@ -6,10 +6,16 @@
 	let serverID;
 	let message;
 	let messages = [];
+	let messagesOutput;
 	let messageInput;
 
-	onSnapshot(doc(db, "servers", "abcdef"), (doc) => {
-		messages = doc.data().messages;
+	onSnapshot(doc(db, "servers", "abcdef"), async (doc) => {
+		messages = await doc.data().messages;
+		messagesOutput.innerHTML = Array.from(
+			messages,
+			(msg) => msg.text
+		).join("<br />");
+		messagesOutput.scrollTop = messagesOutput.scrollHeight;
 	});
 
 	const joinServer = function () {
@@ -43,10 +49,11 @@
 	<div>
 		<h1>Server name</h1>
 		<div id="server-area">
-			<textarea
+			<div
+				id="messages-output"
 				rows="10"
 				placeholder="Server messages"
-				value={Array.from(messages, (msg) => msg.text).join("\n")}
+				bind:this={messagesOutput}
 				disabled
 			/>
 			<div id="message-area">
@@ -64,21 +71,25 @@
 </main>
 
 <style>
-	textarea {
-		resize: none;
+	#messages-output {
+		height: 250px;
+		overflow-y: scroll;
+			
+		margin-bottom: 4px;
 	}
 
-	#server-area > * {
+	#server-area * {
 		width: 500px;
 		box-sizing: border-box;
 	}
 
-	#message-area {
-		display: flex;
-		column-gap: 4px;
+	#message-area input {
+		width: 100%;
 	}
 
-	#message-area > *:nth-child(1) {
-		flex-grow: 1;
+	input,
+	#messages-output {
+		border: 1px solid black;
+		border-radius: 3px;
 	}
 </style>
