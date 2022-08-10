@@ -44,7 +44,12 @@
 
 		const id = generate("0123456789", 20);
 		const ref = doc(db, "servers", "abcdef", "messages", id);
-		setDoc(ref, { msg: message, sentAt: serverTimestamp() });
+		setDoc(ref, {
+			author: "squidee_",
+			edited: false,
+			msg: message,
+			sentAt: serverTimestamp(),
+		});
 	};
 </script>
 
