@@ -1,5 +1,4 @@
 <script>
-	import { onMount } from "svelte";
 	import { generate } from "$utils/randID";
 
 	let serverID;
@@ -10,9 +9,6 @@
 		}
 	};
 
-	onMount(async () => {
-		console.log(await generate());
-	});
 </script>
 
 <main>
