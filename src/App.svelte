@@ -1,6 +1,6 @@
 <script>
-	import { generate } from "$utils/randID";
-	import { db } from "$utils/firebase";
+	import { generate } from "$lib/utils/randID";
+	import { db } from "$lib/utils/firebase";
 	import {
 		doc,
 		onSnapshot,

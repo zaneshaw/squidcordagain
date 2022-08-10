@@ -8,7 +8,6 @@ export default defineConfig({
 	resolve: {
 		alias: [
 			{ find: "$lib", replacement: path.resolve(__dirname, "src/lib/") },
-			{ find: "$utils", replacement: path.resolve(__dirname, "src/utils/") }
 		],
 	},
 })
