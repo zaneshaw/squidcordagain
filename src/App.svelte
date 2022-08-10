@@ -1,6 +1,11 @@
 <script>
 	import { generate } from "$lib/utils/randID";
-	import { db } from "$lib/utils/firebase";
+	import { auth, db } from "$lib/utils/firebase";
+	import {
+		GoogleAuthProvider,
+		onAuthStateChanged,
+		signInWithPopup,
+	} from "@firebase/auth";
 	import {
 		doc,
 		onSnapshot,
@@ -12,6 +17,8 @@
 	} from "firebase/firestore";
 	import { onMount } from "svelte";
 	import Message from "$lib/components/Message.svelte";
+
+	const provider = new GoogleAuthProvider();
 
 	let serverID;
 	let message;
@@ -45,16 +52,29 @@
 		const id = generate("0123456789", 20);
 		const ref = doc(db, "servers", "abcdef", "messages", id);
 		setDoc(ref, {
-			author: "squidee_",
+			author: auth.currentUser.displayName,
 			edited: false,
 			msg: message,
 			sentAt: serverTimestamp(),
 		});
 	};
+
+	const signIn = function () {
+		signInWithPopup(auth, provider)
+			.then((result) => {
+				const user = result.user;
+
+				console.log(user);
+			})
+			.catch((error) => {
+				console.error(error);
+			});
+	};
 </script>
 
 <main>
 	<h1>Squidcord</h1>
+	<button on:click={signIn}>Sign In</button>
 	<div>
 		<label for="server-id">Server ID:</label>
 		<input type="text" id="server-id" bind:value={serverID} />
@@ -63,6 +83,7 @@
 	</div>
 	<hr />
 	<div>
+		{auth.currentUser}
 		<h1>Server name</h1>
 		<div id="server-area">
 			<div id="messages-output" bind:this={messagesOutput}>
