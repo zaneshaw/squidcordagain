@@ -2,8 +2,8 @@
 	import { generate } from "$lib/utils/randID";
 	import { auth, db } from "$lib/utils/firebase";
 	import {
+		getAdditionalUserInfo,
 		GoogleAuthProvider,
-		onAuthStateChanged,
 		signInWithPopup,
 	} from "@firebase/auth";
 	import {
@@ -62,9 +62,19 @@
 	const signIn = function () {
 		signInWithPopup(auth, provider)
 			.then((result) => {
-				const user = result.user;
+				const { user } = result;
+				console.log(getAdditionalUserInfo(result).isNewUser);
 
-				console.log(user);
+				const userObj = {
+					createdAt: user.metadata.creationTime || null,
+					email: user.email,
+					pfp: user.photoURL,
+					signedInAt: user.metadata.lastSignInTime,
+					uid: user.uid,
+					username: user.displayName || "null",
+				};
+
+				setDoc(doc(db, "users", user.uid), userObj, { merge: true });
 			})
 			.catch((error) => {
 				console.error(error);
@@ -83,7 +93,6 @@
 	</div>
 	<hr />
 	<div>
-		{auth.currentUser}
 		<h1>Server name</h1>
 		<div id="server-area">
 			<div id="messages-output" bind:this={messagesOutput}>
