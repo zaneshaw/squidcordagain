@@ -1,21 +1,34 @@
 <script>
 	import { generate } from "$utils/randID";
 	import { db } from "$utils/firebase";
-	import { doc, onSnapshot, updateDoc, arrayUnion } from "firebase/firestore";
+	import {
+		doc,
+		onSnapshot,
+		collection,
+		query,
+		orderBy,
+		setDoc,
+		serverTimestamp,
+	} from "firebase/firestore";
+	import { onMount } from "svelte";
 
 	let serverID;
 	let message;
-	let messages = [];
-	let messagesOutput;
 	let messageInput;
+	let messagesOutput;
 
-	onSnapshot(doc(db, "servers", "abcdef"), async (doc) => {
-		messages = await doc.data().messages;
-		messagesOutput.innerHTML = Array.from(
-			messages,
-			(msg) => msg.text
-		).join("<br />");
-		messagesOutput.scrollTop = messagesOutput.scrollHeight;
+	onMount(() => {
+		const q = query(
+			collection(db, "servers", "abcdef", "messages"),
+			orderBy("sentAt", "asc")
+		);
+		onSnapshot(q, async (snap) => {
+			const msgs = Array.from(snap.docs, (doc) => doc.data()); // Extract documents as array
+			const msgsText = Array.from(msgs, (msg) => msg.msg); // Extract messages as array
+
+			messagesOutput.innerHTML = msgsText.join("<br />"); // Join messages with line breaks
+			messagesOutput.scrollTop = messagesOutput.scrollHeight; // Scroll to bottom of messages div
+		});
 	});
 
 	const joinServer = function () {
@@ -27,13 +40,9 @@
 	const sendMessage = function () {
 		messageInput.value = "";
 
-		const msg = {
-			id: generate("0123456789", 20),
-			text: message,
-		};
-
-		const ref = doc(db, "servers", "abcdef");
-		updateDoc(ref, "messages", arrayUnion(msg));
+		const id = generate("0123456789", 20);
+		const ref = doc(db, "servers", "abcdef", "messages", id);
+		setDoc(ref, { msg: message, sentAt: serverTimestamp() });
 	};
 </script>
 
@@ -74,7 +83,7 @@
 	#messages-output {
 		height: 250px;
 		overflow-y: scroll;
-			
+
 		margin-bottom: 4px;
 	}
 
