@@ -1,7 +1,16 @@
 <script>
 	import { generate } from "$utils/randID";
+	import { db } from "$utils/firebase";
+	import { doc, onSnapshot, updateDoc, arrayUnion } from "firebase/firestore";
 
 	let serverID;
+	let message;
+	let messages = [];
+	let messageInput;
+
+	onSnapshot(doc(db, "servers", "abcdef"), (doc) => {
+		messages = doc.data().messages;
+	});
 
 	const joinServer = function () {
 		if (serverID) {
@@ -9,6 +18,17 @@
 		}
 	};
 
+	const sendMessage = function () {
+		messageInput.value = "";
+
+		const msg = {
+			id: generate("0123456789", 20),
+			text: message,
+		};
+
+		const ref = doc(db, "servers", "abcdef");
+		updateDoc(ref, "messages", arrayUnion(msg));
+	};
 </script>
 
 <main>
@@ -19,18 +39,25 @@
 
 		<button on:click={joinServer}>Join</button>
 	</div>
-	<hr>
+	<hr />
 	<div>
 		<h1>Server name</h1>
 		<div id="server-area">
-			<textarea rows="10" placeholder="Server messages" />
+			<textarea
+				rows="10"
+				placeholder="Server messages"
+				value={Array.from(messages, (msg) => msg.text).join("\n")}
+				disabled
+			/>
 			<div id="message-area">
-				<input
-					type="text"
-					bind:value={serverID}
-					placeholder="Message"
-				/>
-				<button>Send</button>
+				<form on:submit|preventDefault={sendMessage}>
+					<input
+						type="text"
+						placeholder="Message"
+						bind:this={messageInput}
+						bind:value={message}
+					/>
+				</form>
 			</div>
 		</div>
 	</div>
