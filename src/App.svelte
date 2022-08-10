@@ -1,6 +1,6 @@
 <script>
 	import { onMount } from "svelte";
-	import { generate } from "./utils/randID";
+	import { generate } from "$utils/randID";
 
 	let serverID;
 

@@ -6,6 +6,9 @@ import * as path from "path";
 export default defineConfig({
 	plugins: [svelte()],
 	resolve: {
-		alias: [{ find: "$lib", replacement: path.resolve(__dirname, "src/lib/") }],
+		alias: [
+			{ find: "$lib", replacement: path.resolve(__dirname, "src/lib/") },
+			{ find: "$utils", replacement: path.resolve(__dirname, "src/utils/") }
+		],
 	},
 })
