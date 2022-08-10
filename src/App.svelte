@@ -1,4 +1,7 @@
 <script>
+	import { onMount } from "svelte";
+	import { generate } from "./utils/randID";
+
 	let serverID;
 
 	const joinServer = function () {
@@ -6,6 +9,10 @@
 			alert(`Joining \`${serverID}\`...`);
 		}
 	};
+
+	onMount(async () => {
+		console.log(await generate());
+	});
 </script>
 
 <main>
