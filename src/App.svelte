@@ -11,9 +11,11 @@
 		serverTimestamp,
 	} from "firebase/firestore";
 	import { onMount } from "svelte";
+	import Message from "$lib/components/Message.svelte";
 
 	let serverID;
 	let message;
+	let messages = [];
 	let messageInput;
 	let messagesOutput;
 
@@ -23,11 +25,11 @@
 			orderBy("sentAt", "asc")
 		);
 		onSnapshot(q, async (snap) => {
-			const msgs = Array.from(snap.docs, (doc) => doc.data()); // Extract documents as array
-			const msgsText = Array.from(msgs, (msg) => msg.msg); // Extract messages as array
+			messages = Array.from(snap.docs, (doc) => doc.data()); // Extract documents as array
 
-			messagesOutput.innerHTML = msgsText.join("<br />"); // Join messages with line breaks
-			messagesOutput.scrollTop = messagesOutput.scrollHeight; // Scroll to bottom of messages div
+			if (messagesOutput) {
+				messagesOutput.scrollTop = messagesOutput.scrollHeight; // Scroll to bottom of messages div
+			}
 		});
 	});
 
@@ -58,13 +60,11 @@
 	<div>
 		<h1>Server name</h1>
 		<div id="server-area">
-			<div
-				id="messages-output"
-				rows="10"
-				placeholder="Server messages"
-				bind:this={messagesOutput}
-				disabled
-			/>
+			<div id="messages-output" bind:this={messagesOutput}>
+				{#each messages as msg}
+					<Message data={msg} />
+				{/each}
+			</div>
 			<div id="message-area">
 				<form on:submit|preventDefault={sendMessage}>
 					<input
