@@ -16,7 +16,7 @@
 		serverTimestamp,
 	} from "firebase/firestore";
 	import { onMount } from "svelte";
-	import Message from "$lib/components/Message.svelte";
+	import MessageList from "$lib/components/MessageList.svelte";
 
 	const provider = new GoogleAuthProvider();
 
@@ -24,7 +24,6 @@
 	let message;
 	let messages = [];
 	let messageInput;
-	let messagesOutput;
 
 	onMount(() => {
 		const q = query(
@@ -33,10 +32,6 @@
 		);
 		onSnapshot(q, async (snap) => {
 			messages = Array.from(snap.docs, (doc) => doc.data()); // Extract documents as array
-
-			if (messagesOutput) {
-				messagesOutput.scrollTop = messagesOutput.scrollHeight; // Scroll to bottom of messages div
-			}
 		});
 	});
 
@@ -95,11 +90,7 @@
 	<div>
 		<h1>Server name</h1>
 		<div id="server-area">
-			<div id="messages-output" bind:this={messagesOutput}>
-				{#each messages as msg}
-					<Message data={msg} />
-				{/each}
-			</div>
+			<MessageList {messages} />
 			<div id="message-area">
 				<form on:submit|preventDefault={sendMessage}>
 					<input
@@ -115,15 +106,11 @@
 </main>
 
 <style>
-	#messages-output {
-		height: 250px;
-		overflow-y: scroll;
-
-		margin-bottom: 4px;
+	#server-area {
+		width: 500px;
 	}
 
-	#server-area * {
-		width: 500px;
+	:global(#server-area *) {
 		box-sizing: border-box;
 	}
 
@@ -131,8 +118,7 @@
 		width: 100%;
 	}
 
-	input,
-	#messages-output {
+	input {
 		border: 1px solid black;
 		border-radius: 3px;
 	}
