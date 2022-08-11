@@ -29,8 +29,6 @@
 	});
 
 	const sendMessage = function () {
-		messageInput.value = "";
-
 		const id = generate("0123456789", 20);
 		const docRef = doc(db, "servers", "abcdef", "messages", id);
 		const userRef = doc(db, "users", user.uid);
@@ -41,6 +39,15 @@
 			sentAt: serverTimestamp(),
 		});
 	};
+
+	const onInput = (e) => {
+		if (e.key !== "Enter" || messageInput.value === null || messageInput.value.trim() === "") {
+			return;
+		}
+
+		sendMessage();
+		messageInput.value = "";
+	};
 </script>
 
 <div>
@@ -48,14 +55,13 @@
 	<div id="server-area">
 		<MessageList {messages} />
 		<div id="message-area">
-			<form on:submit|preventDefault={sendMessage}>
-				<input
-					type="text"
-					placeholder="Message"
-					bind:this={messageInput}
-					bind:value={message}
-				/>
-			</form>
+			<input
+				type="text"
+				placeholder="Message"
+				bind:this={messageInput}
+				bind:value={message}
+				on:keydown={onInput}
+			/>
 		</div>
 	</div>
 </div>
