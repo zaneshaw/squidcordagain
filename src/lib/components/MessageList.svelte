@@ -22,7 +22,7 @@
 		overflow-y: scroll;
 
 		margin-bottom: 4px;
-		
+
 		border: 1px solid black;
 		border-radius: 3px;
 	}
