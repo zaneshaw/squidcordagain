@@ -5,9 +5,11 @@
 		getAdditionalUserInfo,
 		GoogleAuthProvider,
 		signInWithPopup,
+		onAuthStateChanged,
 	} from "@firebase/auth";
 	import {
 		doc,
+		getDoc,
 		onSnapshot,
 		collection,
 		query,
@@ -20,6 +22,7 @@
 
 	const provider = new GoogleAuthProvider();
 
+	let user = null;
 	let serverID;
 	let message;
 	let messages = [];
@@ -35,6 +38,23 @@
 		});
 	});
 
+	onAuthStateChanged(auth, async (_user) => {
+		if (_user) {
+			user = await getUser(_user.uid);
+		}
+	});
+
+	const getUser = async function (uid) {
+		const ref = doc(db, "users", uid);
+		const snap = await getDoc(ref);
+		if (snap.exists()) {
+			return snap.data();
+		} else {
+			console.error("User doesn't exist!");
+			return null;
+		}
+	};
+
 	const joinServer = function () {
 		if (serverID) {
 			alert(`Joining \`${serverID}\`...`);
@@ -45,9 +65,10 @@
 		messageInput.value = "";
 
 		const id = generate("0123456789", 20);
-		const ref = doc(db, "servers", "abcdef", "messages", id);
-		setDoc(ref, {
-			author: auth.currentUser.displayName,
+		const docRef = doc(db, "servers", "abcdef", "messages", id);
+		const userRef = doc(db, "users", user.uid);
+		setDoc(docRef, {
+			authorRef: userRef,
 			edited: false,
 			msg: message,
 			sentAt: serverTimestamp(),
@@ -56,7 +77,7 @@
 
 	const signIn = function () {
 		signInWithPopup(auth, provider)
-			.then((result) => {
+			.then(async (result) => {
 				const { user } = result;
 				console.log(getAdditionalUserInfo(result).isNewUser);
 
@@ -69,7 +90,9 @@
 					username: user.displayName || "null",
 				};
 
-				setDoc(doc(db, "users", user.uid), userObj, { merge: true });
+				await setDoc(doc(db, "users", user.uid), userObj, {
+					merge: true,
+				});
 			})
 			.catch((error) => {
 				console.error(error);
