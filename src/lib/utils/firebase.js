@@ -1,5 +1,5 @@
 import { initializeApp } from "firebase/app";
-import { getFirestore, connectFirestoreEmulator } from "firebase/firestore";
+import { getFirestore, connectFirestoreEmulator, doc, getDoc } from "firebase/firestore";
 import { getAuth, connectAuthEmulator } from "firebase/auth";
 
 const firebaseConfig = {
@@ -18,3 +18,14 @@ export const auth = getAuth(app);
 
 connectFirestoreEmulator(db, "localhost", 8080);
 connectAuthEmulator(auth, "http://localhost:9099");
+
+export async function getUser(uid) {
+	const ref = doc(db, "users", uid);
+	const snap = await getDoc(ref);
+	if (snap.exists()) {
+		return snap.data();
+	} else {
+		console.error("User doesn't exist!");
+		return null;
+	}
+};
