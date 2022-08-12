@@ -18,6 +18,8 @@
 	onAuthStateChanged(auth, async (_user) => {
 		if (_user) {
 			user = await getUser(_user.uid);
+		} else {
+			user = null;
 		}
 	});
 
