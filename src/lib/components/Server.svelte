@@ -13,6 +13,7 @@
 	} from "firebase/firestore";
 	import { onMount } from "svelte";
 	import MessageList from "$lib/components/MessageList.svelte";
+	import { createEventDispatcher } from "svelte";
 
 	export let serverID;
 	export let user;
@@ -21,11 +22,18 @@
 	let message;
 	let messages = [];
 	let messageInput;
+	let loaded;
 
+	const dispatch = createEventDispatcher();
 	const serverRef = doc(db, "servers", serverID);
 
 	onMount(async () => {
 		const snap = await getDoc(serverRef);
+		if (!snap.exists()) {
+			leaveServer({ reason: "bad_id" });
+			return;
+		}
+
 		serverName = snap.data().name;
 
 		const q = query(
@@ -35,6 +43,8 @@
 		onSnapshot(q, async (snap) => {
 			messages = Array.from(snap.docs, (doc) => doc.data()); // Extract documents as array
 		});
+
+		loaded = true;
 	});
 
 	const sendMessage = function () {
@@ -49,7 +59,7 @@
 		});
 	};
 
-	const onInput = (e) => {
+	const onInput = function (e) {
 		if (
 			e.key !== "Enter" ||
 			messageInput.value === null ||
@@ -61,23 +71,33 @@
 		sendMessage();
 		messageInput.value = "";
 	};
+
+	const leaveServer = function (data = { reason: null }) {
+		dispatch("leave", data);
+	};
 </script>
 
-<div>
-	<h1>{serverName}</h1>
-	<div id="server-area">
-		<MessageList {messages} />
-		<div id="message-area">
-			<input
-				type="text"
-				placeholder="Message"
-				bind:this={messageInput}
-				bind:value={message}
-				on:keydown={onInput}
-			/>
+{#if loaded}
+	<div>
+		<h1>{serverName}</h1>
+		<span
+			style="cursor: pointer; text-decoration: underline; color: blue;"
+			on:click={() => leaveServer({ reason: "user" })}>Leave</span
+		>
+		<div id="server-area">
+			<MessageList {messages} />
+			<div id="message-area">
+				<input
+					type="text"
+					placeholder="Message"
+					bind:this={messageInput}
+					bind:value={message}
+					on:keydown={onInput}
+				/>
+			</div>
 		</div>
 	</div>
-</div>
+{/if}
 
 <style>
 	#server-area {

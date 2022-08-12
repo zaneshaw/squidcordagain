@@ -12,6 +12,7 @@
 
 	let user = null;
 	let serverID;
+	let serverIDRef;
 
 	const provider = new GoogleAuthProvider();
 
@@ -24,8 +25,9 @@
 	});
 
 	const joinServer = function () {
-		if (serverID) {
-			alert(`Joining \`${serverID}\`...`);
+		if (serverIDRef) {
+			serverID = serverIDRef;
+			serverIDRef = null;
 		}
 	};
 
@@ -52,20 +54,29 @@
 				console.error(error);
 			});
 	};
+
+	const leaveServer = function (e) {
+		console.log(`Leaving server... (${e.detail.reason})`);
+		serverID = null;
+	};
 </script>
 
 <main>
 	<h1>Squidcord</h1>
 	<div>
 		<label for="server-id">Server ID:</label>
-		<input type="text" id="server-id" bind:value={serverID} />
+		<input type="text" id="server-id" bind:value={serverIDRef} />
 
 		<button on:click={joinServer}>Join</button>
 	</div>
 	<hr />
 	{#if user}
 		<button on:click={() => signOut(auth)}>Sign Out</button>
-		<Server serverID={"abcdef"} {user} />
+		{#if serverID}
+			{#key serverID}
+				<Server {serverID} {user} on:leave={leaveServer} />
+			{/key}
+		{/if}
 	{:else}
 		<button on:click={signIn}>Sign In</button>
 	{/if}
