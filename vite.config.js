@@ -9,9 +9,5 @@ export default defineConfig({
 		alias: [
 			{ find: "$lib", replacement: path.resolve(__dirname, "src/lib/") },
 		],
-	},
-	server: {
-		host: "172.18.20.16",
-		port: 5173,
 	}
 })
