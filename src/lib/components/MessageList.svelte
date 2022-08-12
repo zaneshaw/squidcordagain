@@ -18,7 +18,8 @@
 
 <style>
 	#messages-output {
-		height: 250px;
+		width: 100%;
+		height: 500px;
 		overflow-y: scroll;
 
 		margin-bottom: 4px;

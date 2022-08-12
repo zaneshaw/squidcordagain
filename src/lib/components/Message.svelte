@@ -41,9 +41,10 @@
 	};
 </script>
 
-<div style="overflow: auto; height: 20px;">
+<div style="overflow-wrap: break-word; min-height: 20px; margin-top: 20px; margin-bottom: 20px;">
 	{#if loaded}
-		<span style="font-weight: bold;">{author}:</span>
+		<span style="font-weight: bold;">{author}</span>
+		<br>
 		<span>{data.msg}</span>
 	{/if}
 </div>

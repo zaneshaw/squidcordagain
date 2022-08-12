@@ -68,10 +68,14 @@
 
 <style>
 	#server-area {
-		width: 500px;
+		width: 1000px;
 	}
 
 	#message-area input {
 		width: 100%;
+		height: 30px;
+
+		border: 1px solid black;
+		border-radius: 3px;
 	}
 </style>
