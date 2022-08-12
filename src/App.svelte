@@ -65,7 +65,7 @@
 	<hr />
 	{#if user}
 		<button on:click={() => signOut(auth)}>Sign Out</button>
-		<Server {user} />
+		<Server serverID={"abcdef"} {user} />
 	{:else}
 		<button on:click={signIn}>Sign In</button>
 	{/if}
