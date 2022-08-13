@@ -1,9 +1,8 @@
 <script>
 	import { generate } from "$lib/utils/randID";
-	import { auth, db } from "$lib/utils/firebase";
+	import { db } from "$lib/utils/firebase";
 	import {
 		doc,
-		getDoc,
 		onSnapshot,
 		collection,
 		query,
@@ -15,27 +14,18 @@
 	import MessageList from "$lib/components/MessageList.svelte";
 	import { createEventDispatcher } from "svelte";
 
-	export let serverID;
+	export let server;
 	export let user;
 
-	let serverName;
 	let message;
 	let messages = [];
 	let messageInput;
 	let loaded;
 
 	const dispatch = createEventDispatcher();
-	const serverRef = doc(db, "servers", serverID);
+	const serverRef = doc(db, "servers", server.id);
 
 	onMount(async () => {
-		const snap = await getDoc(serverRef);
-		if (!snap.exists()) {
-			leaveServer({ reason: "bad_id" });
-			return;
-		}
-
-		serverName = snap.data().name;
-
 		const q = query(
 			collection(serverRef, "messages"),
 			orderBy("sentAt", "asc")
@@ -72,17 +62,17 @@
 		messageInput.value = "";
 	};
 
-	const leaveServer = function (data = { reason: null }) {
-		dispatch("leave", data);
+	const leaveServer = function () {
+		dispatch("leave", { serverID: server.id });
 	};
 </script>
 
 {#if loaded}
 	<div>
-		<h1>{serverName}</h1>
+		<h1>{server.data.name}</h1>
 		<span
 			style="cursor: pointer; text-decoration: underline; color: blue;"
-			on:click={() => leaveServer({ reason: "user" })}>Leave</span
+			on:click={() => leaveServer()}>Leave</span
 		>
 		<div id="server-area">
 			<MessageList {messages} />
