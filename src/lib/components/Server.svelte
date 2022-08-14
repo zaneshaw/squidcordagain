@@ -9,11 +9,12 @@
 		orderBy,
 		setDoc,
 		serverTimestamp,
-getDoc,
+		getDoc,
 	} from "firebase/firestore";
 	import { onMount } from "svelte";
 	import MessageList from "$lib/components/MessageList.svelte";
 	import { createEventDispatcher } from "svelte";
+	import { inCache, users } from "$lib/stores/userCache";
 
 	export let server;
 	export let user;
@@ -28,9 +29,8 @@ getDoc,
 	const serverRef = doc(db, "servers", server.id);
 
 	onMount(async () => {
-		console.log(server.data.members);
 		getMembers();
-		
+
 		const q = query(
 			collection(serverRef, "messages"),
 			orderBy("sentAt", "asc")
@@ -44,18 +44,29 @@ getDoc,
 
 	const getMembers = async function () {
 		const membersRef = server.data.members;
-		let _members = [];
 
 		if (membersRef) {
 			for (let i = 0; i < membersRef.length; i++) {
-				const server = membersRef[i];
-				const test = await getDoc(server);
+				const memberRef = membersRef[i];
+				let member;
 
-				_members.push(test.data());
+				const cache = inCache(memberRef.id);
+				if (!!cache) {
+					member = cache;
+				} else {
+					// Save user to cache
+					const user = (await getDoc(memberRef)).data();
+
+					console.log(`Saving '${user.username}' to cache...`);
+					$users.push(user);
+					member = user;
+				}
+
+				// Push to 'members' array and trigger reactivity
+				members = [...members, member];
 			}
 		}
-		members = _members;
-	}
+	};
 
 	const sendMessage = function () {
 		const id = generate("0123456789", 20);
@@ -108,7 +119,9 @@ getDoc,
 			</div>
 			<div style="width: 200px; margin-left: 20px;">
 				<h2 style="margin-top: 0px;">Members</h2>
-				<ul style="margin-top: 0px; padding-left: 0px; list-style-type: none;">
+				<ul
+					style="margin-top: 0px; padding-left: 0px; list-style-type: none;"
+				>
 					{#each members as member}
 						<li>{member.username}</li>
 					{/each}
