@@ -9,6 +9,7 @@
 		orderBy,
 		setDoc,
 		serverTimestamp,
+getDoc,
 	} from "firebase/firestore";
 	import { onMount } from "svelte";
 	import MessageList from "$lib/components/MessageList.svelte";
@@ -20,12 +21,16 @@
 	let message;
 	let messages = [];
 	let messageInput;
+	let members = [];
 	let loaded;
 
 	const dispatch = createEventDispatcher();
 	const serverRef = doc(db, "servers", server.id);
 
 	onMount(async () => {
+		console.log(server.data.members);
+		getMembers();
+		
 		const q = query(
 			collection(serverRef, "messages"),
 			orderBy("sentAt", "asc")
@@ -36,6 +41,21 @@
 
 		loaded = true;
 	});
+
+	const getMembers = async function () {
+		const membersRef = server.data.members;
+		let _members = [];
+
+		if (membersRef) {
+			for (let i = 0; i < membersRef.length; i++) {
+				const server = membersRef[i];
+				const test = await getDoc(server);
+
+				_members.push(test.data());
+			}
+		}
+		members = _members;
+	}
 
 	const sendMessage = function () {
 		const id = generate("0123456789", 20);
@@ -74,27 +94,36 @@
 			style="cursor: pointer; text-decoration: underline; color: blue;"
 			on:click={() => leaveServer()}>Leave</span
 		>
-		<div id="server-area">
-			<MessageList {messages} />
-			<div id="message-area">
+		<div style="display: flex; flex-direction: row;">
+			<div id="message-area" style="flex-grow: 1;">
+				<MessageList {messages} />
 				<input
 					type="text"
 					placeholder="Message"
+					id="message-input"
 					bind:this={messageInput}
 					bind:value={message}
 					on:keydown={onInput}
 				/>
+			</div>
+			<div style="width: 200px; margin-left: 20px;">
+				<h2 style="margin-top: 0px;">Members</h2>
+				<ul style="margin-top: 0px; padding-left: 0px; list-style-type: none;">
+					{#each members as member}
+						<li>{member.username}</li>
+					{/each}
+				</ul>
 			</div>
 		</div>
 	</div>
 {/if}
 
 <style>
-	#server-area {
+	#message-area {
 		width: 1000px;
 	}
 
-	#message-area input {
+	#message-input {
 		width: 100%;
 		height: 30px;
 		padding-left: 10px;
