@@ -28,8 +28,7 @@
 
 	onAuthStateChanged(auth, async (_user) => {
 		if (_user) {
-			user = await getUser(_user.uid);
-			await getServers();
+			syncUser(_user.uid)
 		} else {
 			user = null;
 		}
@@ -121,8 +120,8 @@
 		servers = _servers;
 	};
 
-	const syncUser = async function () {
-		user = await getUser(user.uid);
+	const syncUser = async function (uid = user.uid) {
+		user = await getUser(uid);
 		await getServers();
 	};
 
