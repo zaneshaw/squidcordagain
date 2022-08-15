@@ -12,7 +12,7 @@
 
 <div id="messages-output" bind:this={list}>
 	{#each messages as msg}
-		<Message data={msg} />
+		<Message {msg} />
 	{/each}
 </div>
 

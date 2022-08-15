@@ -36,7 +36,7 @@
 			orderBy("sentAt", "asc")
 		);
 		onSnapshot(q, async (snap) => {
-			messages = Array.from(snap.docs, (doc) => doc.data()); // Extract documents as array
+			messages = Array.from(snap.docs, (doc) => new Object({id: doc.id, data: doc.data()})); // Extract documents as array
 		});
 
 		loaded = true;
