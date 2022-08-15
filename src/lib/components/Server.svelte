@@ -9,7 +9,6 @@
 		orderBy,
 		setDoc,
 		serverTimestamp,
-		getDoc,
 	} from "firebase/firestore";
 	import { onMount } from "svelte";
 	import MessageList from "$lib/components/MessageList.svelte";
@@ -36,7 +35,10 @@
 			orderBy("sentAt", "asc")
 		);
 		onSnapshot(q, async (snap) => {
-			messages = Array.from(snap.docs, (doc) => new Object({id: doc.id, data: doc.data()})); // Extract documents as array
+			messages = Array.from(
+				snap.docs,
+				(doc) => new Object({ id: doc.id, data: doc.data() })
+			); // Extract documents as array
 		});
 
 		loaded = true;
