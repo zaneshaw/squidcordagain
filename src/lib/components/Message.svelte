@@ -1,6 +1,6 @@
 <script>
 	import { onMount } from "svelte";
-	import { inCache } from "$lib/stores/userCache";
+	import { inCache, users } from "$lib/stores/userCache";
 	import { getUser } from "$lib/utils/firebase";
 
 	export let msg;
@@ -10,10 +10,23 @@
 	onMount(async () => {
 		const ref = msg.data.authorRef;
 		const cached = inCache(ref.id);
-		author = cached ? cached.username : (await getUser(ref.id)).username;
+		author = inCache(ref.id) ? cached.username : (await addToCache(ref)).username;
 
 		loaded = true;
 	});
+
+	const addToCache = async function (userRef) {
+		//! Unnecessary duplicate read
+		const user = await getUser(userRef.id);
+
+		// Late check
+		if (!inCache(userRef.id)) {
+			console.log(`Caching '${user.username}'...`);
+			$users.push(user);
+		}
+
+		return user;
+	};
 </script>
 
 <div

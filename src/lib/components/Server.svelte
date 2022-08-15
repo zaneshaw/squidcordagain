@@ -1,6 +1,6 @@
 <script>
 	import { generate } from "$lib/utils/randID";
-	import { db } from "$lib/utils/firebase";
+	import { db, getUser } from "$lib/utils/firebase";
 	import {
 		doc,
 		onSnapshot,
@@ -55,7 +55,7 @@
 					member = cache;
 				} else {
 					// Save user to cache
-					const user = (await getDoc(memberRef)).data();
+					const user = await getUser(memberRef.id);
 
 					console.log(`Caching '${user.username}'...`);
 					$users.push(user);
