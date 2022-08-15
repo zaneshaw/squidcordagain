@@ -1,6 +1,7 @@
 <script>
 	import { onMount } from "svelte";
 	import { inCache } from "$lib/stores/userCache";
+	import { getUser } from "$lib/utils/firebase";
 
 	export let msg;
 	let author;
@@ -8,8 +9,8 @@
 
 	onMount(async () => {
 		const ref = msg.data.authorRef;
-
-		author = inCache(ref.id).username || "Deleted user";
+		const cached = inCache(ref.id);
+		author = cached ? cached.username : (await getUser(ref.id)).username;
 
 		loaded = true;
 	});

@@ -57,7 +57,7 @@
 					// Save user to cache
 					const user = (await getDoc(memberRef)).data();
 
-					console.log(`Saving '${user.username}' to cache...`);
+					console.log(`Caching '${user.username}'...`);
 					$users.push(user);
 					member = user;
 				}
